@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f2ed" />
+    <meta name="description" content="Build Your Reels — a private, browser-based photo and video editing workspace." />
+    <title>BYR — Build Your Reels</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="BYR home"><span class="brand-mark">b</span><span>build your reels</span></a>
+        <div class="project-name"><span class="status-dot"></span><span id="active-project-name">Loading projects…</span><span class="saved-label" id="save-state">Opening local workspace</span></div>
+        <div class="top-actions"><button class="icon-button" id="help-button" aria-label="About local storage">i</button><button class="share-button" id="project-menu-button" type="button">Project <span>⌄</span></button><div class="project-menu" id="project-menu" hidden><button type="button" data-action="rename">Rename</button><button type="button" data-action="duplicate">Duplicate</button><button type="button" data-action="export">Export project package</button><button class="danger-action" type="button" data-action="delete">Delete project</button></div></div>
+      </header>
+
+      <main class="workspace">
+        <aside class="sidebar" aria-label="Workspace navigation">
+          <div class="side-heading"><span>WORKSPACE</span></div>
+          <button class="workspace-link active" type="button"><span class="nav-icon">▦</span> Editor</button>
+          <div class="side-divider"></div>
+          <div class="side-heading"><span>YOUR PROJECTS</span><button class="more-button" id="new-project-shortcut" aria-label="Create project">＋</button></div>
+          <nav class="project-list" id="project-list" aria-label="Your projects"></nav>
+          <button class="new-project" id="new-project-button" type="button">＋ <span>New project</span></button>
+          <div class="sidebar-bottom"><div class="avatar">BY</div><div><strong>This browser</strong><small id="storage-summary">Checking local storage</small></div><button class="more-button" id="storage-details-button" aria-label="Storage details">···</button></div>
+        </aside>
+
+        <section class="editor-area">
+          <div class="page-heading"><div><div class="eyebrow" id="project-meta">PRIVATE WORKSPACE <span>·</span> SAVED ON THIS DEVICE</div><h1>Make something <em>memorable.</em></h1><p>Your next story starts with a few good frames.</p></div><button class="text-button" id="rename-project-button" type="button">✎ <span class="search-label">Rename project</span></button></div>
+
+          <div class="content-grid">
+            <section class="canvas-panel" aria-label="Project preview">
+              <div class="panel-topline"><div><span class="panel-label">CANVAS</span><span class="panel-separator">/</span><span class="canvas-name" id="canvas-project-name">Untitled project</span></div><label class="ratio-select-label">Ratio<select id="canvas-ratio" aria-label="Canvas aspect ratio"><option>9:16</option><option>16:9</option><option>1:1</option><option>4:5</option></select></label></div>
+              <div class="canvas-stage" id="canvas-stage">
+                <div class="canvas-art" id="canvas-art">
+                  <canvas class="editor-canvas" id="editor-canvas" aria-label="Canvas preview. Choose media to begin editing."></canvas>
+                </div>
+                <div class="canvas-float canvas-float-top"><span class="sparkle">✳</span> <span id="canvas-status">Choose media to start</span></div>
+                <div class="canvas-tools"><span id="canvas-dimensions">675 × 1200</span></div>
+              </div>
+              <div class="canvas-workspace-hint" id="workspace-hint">Select media to see its editing tools.</div>
+            </section>
+
+            <aside class="inspector" aria-label="Project media">
+              <div class="inspector-tabs" role="tablist" aria-label="Editor panels"><button class="inspector-tab active" type="button" data-panel="media-panel" role="tab" aria-selected="true">Media</button><button class="inspector-tab" type="button" data-panel="photo-panel" role="tab" aria-selected="false">Adjust</button><button class="inspector-tab" type="button" data-panel="video-panel" role="tab" aria-selected="false">Sequence</button><button class="inspector-tab" type="button" data-panel="export-panel" role="tab" aria-selected="false">Export</button></div>
+              <div class="inspector-content" id="media-panel" role="tabpanel">
+                <div class="media-heading"><div><h2>Your media</h2><p>Private to this browser.</p></div><span class="media-count" id="media-count">00</span></div>
+                <label class="upload-drop" for="media-input" id="drop-zone"><span class="upload-icon">↥</span><strong>Drop files to add</strong><span>or <u>browse your device</u></span><small>Images, video · up to 100 MB per file</small><input id="media-input" type="file" accept="image/*,video/*" multiple /></label>
+                <input id="folder-input" class="visually-hidden" type="file" accept="image/*,video/*" multiple webkitdirectory />
+                <div class="media-filter"><span>PROJECT FILES</span><div class="media-view-controls"><button type="button" id="toggle-media-view" aria-label="Switch to list view">List</button><select id="sort-media" aria-label="Sort media"><option value="newest">Newest</option><option value="name">Name</option><option value="largest">Largest</option></select></div></div>
+                <label class="media-search"><span aria-hidden="true">⌕</span><input id="media-search" type="search" placeholder="Search this project" aria-label="Search project media" /></label>
+                <div class="library-actions"><button type="button" id="folder-button">＋ Add folder</button><button type="button" id="import-project-button">Import project</button><input id="package-input" class="visually-hidden" type="file" accept="application/json,.byr" /></div>
+                <div class="media-grid" id="media-grid" aria-live="polite"></div>
+                <div class="empty-library" id="empty-library"><span>▧</span><strong>No media in this project yet</strong><p>Choose files or drop them above. Original files are kept in this browser.</p></div>
+                <div class="inspector-note"><span>✳</span><p>Files stay on this device.<br /><strong>They are never uploaded.</strong></p></div>
+              </div>
+              <section class="inspector-content editor-controls" id="photo-panel" role="tabpanel" hidden>
+                <div class="media-heading"><div><h2 id="adjustment-heading">Photo adjustments</h2><p id="adjustment-description">Edits are non-destructive.</p></div><span class="media-count">EDIT</span></div>
+                <div class="history-controls"><button id="undo-photo-button" type="button" disabled aria-label="Undo photo edit">↶ Undo</button><button id="redo-photo-button" type="button" disabled aria-label="Redo photo edit">↷ Redo</button><button id="reset-photo-button" type="button">Reset</button></div>
+                <label class="editor-range"><span>Brightness <output id="brightness-value">+0</output></span><input id="photo-brightness" type="range" min="-80" max="80" value="0" /></label>
+                <label class="editor-range"><span>Contrast <output id="contrast-value">+0</output></span><input id="photo-contrast" type="range" min="-60" max="80" value="0" /></label>
+                <label class="editor-range"><span>Saturation <output id="saturation-value">+0</output></span><input id="photo-saturation" type="range" min="-100" max="100" value="0" /></label>
+                <label class="editor-range"><span>Temperature <output id="temperature-value">+0</output></span><input id="photo-temperature" type="range" min="-100" max="100" value="0" /></label>
+                <label class="editor-range"><span>Highlights <output id="highlights-value">+0</output></span><input id="photo-highlights" type="range" min="-100" max="100" value="0" /></label>
+                <label class="editor-range"><span>Shadows <output id="shadows-value">+0</output></span><input id="photo-shadows" type="range" min="-100" max="100" value="0" /></label>
+                <label class="editor-range"><span>Crop zoom <output id="zoom-value">1.0×</output></span><input id="photo-zoom" type="range" min="1" max="3" step="0.1" value="1" /></label>
+                <label class="look-field">Filter<select id="photo-look"><option value="none">Original</option><option value="warm">Warm</option><option value="cool">Cool</option><option value="mono">Monochrome</option><option value="fade">Soft fade</option><option value="overlay">Overlay contrast</option><option value="burn">Color burn</option><option value="multiply">Multiply</option><option value="screen">Screen</option><option value="soft-light">Soft light</option></select></label>
+                <label class="editor-range compact-range"><span>Filter strength <output id="filter-amount-value">70%</output></span><input id="filter-amount" type="range" min="0" max="100" value="70" /></label>
+                <div class="photo-actions"><button type="button" id="rotate-button">↻ Rotate</button><button type="button" id="flip-button" aria-pressed="false">⇋ Flip</button><button type="button" id="fit-mode">Fill frame</button><label class="background-control">Background<input type="color" id="background-color" value="#171916" aria-label="Canvas background color" /></label></div>
+                <div class="overlay-editor"><h3>Caption & layers</h3><p class="control-hint">Add text, then drag it on the canvas. Drag its lower-right handle to resize.</p><div class="overlay-add"><input id="overlay-text-input" type="text" maxlength="100" placeholder="Write a caption…" aria-label="Caption text" /><input id="overlay-color" type="color" value="#ffffff" aria-label="New object color" /><button type="button" id="add-overlay-button" aria-label="Add text layer">＋</button></div><div class="shape-add"><select id="overlay-shape" aria-label="Object type"><option value="rectangle">Rectangle</option><option value="ellipse">Ellipse</option><option value="frame">Frame</option><option value="line">Line</option><option value="arrow">Arrow</option><option value="star">Star sticker</option><option value="heart">Heart sticker</option><option value="speech">Speech bubble</option></select><button type="button" id="add-shape-button">＋ Add</button></div><div id="overlay-list" class="overlay-list" aria-label="Canvas layers"></div><fieldset class="layer-properties" id="layer-properties" disabled><legend>Selected object</legend><label class="layer-property text-layer-property" id="layer-text-wrap">Text<input id="layer-text" type="text" maxlength="100" aria-label="Selected caption text" /></label><div class="layer-property-row text-layer-property"><label class="layer-property">Font<select id="layer-font"><option value="sans">Modern</option><option value="serif">Editorial</option><option value="mono">Mono</option></select></label><label class="layer-property">Align<select id="layer-align"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label></div><label class="editor-range layer-property-size"><span>Size <output id="layer-size-value">56</output></span><input id="layer-size" type="range" min="16" max="240" value="56" /></label><label class="editor-range"><span>Opacity <output id="layer-opacity-value">100%</output></span><input id="layer-opacity" type="range" min="0" max="100" value="100" /></label><label class="layer-property layer-color-wrap">Color<input id="layer-color" type="color" value="#ffffff" /></label></fieldset><div class="layer-position" aria-label="Position and size of selected layer"><button type="button" data-layer-move="0,-0.02" aria-label="Move selected layer up">↑</button><button type="button" data-layer-move="-0.02,0" aria-label="Move selected layer left">←</button><button type="button" data-layer-move="0.02,0" aria-label="Move selected layer right">→</button><button type="button" data-layer-move="0,0.02" aria-label="Move selected layer down">↓</button><span>Move</span><button type="button" data-layer-size="-8" aria-label="Make selected layer smaller">−</button><button type="button" data-layer-size="8" aria-label="Make selected layer larger">＋</button><span>Resize</span></div></div>
+                <p class="panel-footnote">Keyboard: select a layer and use arrow keys to move it. Changes save on this device.</p>
+              </section>
+              <section class="inspector-content sequence-controls" id="video-panel" role="tabpanel" hidden>
+                <div class="media-heading"><div><h2>Video sequence</h2><p>Arrange clips and set how long each appears.</p></div><span class="media-count" id="sequence-summary">0 clips · 0 sec</span></div>
+                <div class="sequence-actions sequence-panel-actions"><button class="text-button small" id="sequence-add-selected" type="button">＋ Add selected</button><button class="text-button small" id="add-media-inline" type="button">＋ Add media</button></div>
+                <div class="sequence-list" id="sequence-items" aria-label="Video sequence clips"></div>
+                <div class="sequence-ruler"><span id="project-item-count">0 files</span><span>Reorder with the arrows · durations are in seconds</span></div>
+                <div class="inspector-note"><span>▶</span><p>Selected mode: <strong id="sequence-selected-media">No clip selected</strong><br />Video export is silent and renders in real time.</p></div>
+              </section>
+              <section class="inspector-content export-controls" id="export-panel" role="tabpanel" hidden>
+                <div class="media-heading"><div><h2>Export</h2><p>Render on this device.</p></div></div>
+                <label class="export-field">Output type<select id="export-type"><option value="image/png">PNG image</option><option value="image/jpeg">JPEG image</option><option value="image/webp">WebP image</option><option value="video/sequence">Video sequence</option></select></label>
+                <label class="export-field">Long edge<select id="export-size"><option value="720">720 px</option><option value="1080" selected>1080 px</option><option value="1440">1440 px</option><option value="2160">2160 px</option></select></label>
+                <label class="export-field quality-field">Quality <output id="export-quality-value">85%</output><input id="export-quality" type="range" min="40" max="100" value="85" /></label>
+                <label class="export-field video-only" id="framerate-field" hidden>Frame rate<select id="export-framerate"><option value="24">24 fps</option><option value="30" selected>30 fps</option><option value="60">60 fps</option></select></label>
+                <div class="export-estimate" id="export-estimate">Choose a format to see estimated output details.</div>
+                <progress id="export-progress" max="100" value="0" hidden></progress>
+                <p id="export-status" class="export-status" role="status" aria-live="polite">Exports stay on this device.</p>
+                <button class="export-primary" id="start-export-button" type="button">Export selected photo</button>
+                <button class="export-cancel" id="cancel-export-button" type="button" hidden>Cancel export</button>
+                <button class="clear-local-data" id="clear-local-data-button" type="button">Clear all BYR data in this browser</button>
+                <div class="inspector-note"><span>↻</span><p>Video export records in real time.<br /><strong>Keep this tab open until it finishes.</strong></p></div>
+              </section>
+            </aside>
+          </div>
+          <footer class="editor-footer"><span><i class="live-dot"></i> <span id="footer-save-state">All changes saved locally</span></span><button type="button" id="privacy-button">Privacy & storage</button></footer>
+        </section>
+      </main>
+      <dialog class="app-dialog" id="app-dialog"><form method="dialog"><div class="dialog-kicker">BYR · LOCAL WORKSPACE</div><h2 id="dialog-title">New project</h2><p id="dialog-description"></p><label class="dialog-field" id="dialog-field-label">Project name<input id="dialog-input" maxlength="80" autocomplete="off" /></label><div class="dialog-actions"><button class="dialog-cancel" value="cancel">Cancel</button><button class="dialog-confirm" id="dialog-confirm" value="confirm">Continue</button></div></form></dialog>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="error-boundary-banner" id="app-error-banner" role="alert" hidden><span id="app-error-message"></span><button type="button" id="dismiss-error-button" aria-label="Dismiss error">×</button></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

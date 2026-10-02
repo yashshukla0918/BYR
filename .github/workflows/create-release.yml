@@ -1,0 +1,64 @@
+name: Create dated release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version suffix (for example, 1.0)
+        required: true
+        default: '1.0'
+        type: string
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  release:
+    name: Tag and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Version must look like 1.0 or 1.0.1; received: $RELEASE_VERSION" >&2
+            exit 1
+          fi
+
+      - name: Check out the selected commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push dated tag
+        id: tag
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE_PART="$(date -u '+%-d-%-m-%Y')"
+          TAG="${DATE_PART}-v${RELEASE_VERSION}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists. Choose another version suffix." >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+        run: gh release create "$RELEASE_TAG" --title "$RELEASE_TAG" --generate-notes
+
+      - name: Dispatch Pages deployment for the new tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+          WORKFLOW_REF: ${{ github.ref_name }}
+        run: gh workflow run deploy-pages.yml --ref "$WORKFLOW_REF" --field tag="$RELEASE_TAG"

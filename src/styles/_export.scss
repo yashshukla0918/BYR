@@ -1,0 +1,14 @@
+@use 'tokens' as *;
+
+.export-field { display: block; color: #73746c; font-size: 9px; margin-top: 16px; }
+.export-field select { display: block; width: 100%; margin-top: 7px; border: 1px solid $line; border-radius: 4px; background: transparent; color: #53544e; padding: 8px; font-size: 9px; }
+.quality-field { display: block; }
+.quality-field output { float: right; color: #93938a; font: 9px $mono; }
+.export-estimate { margin-top: 16px; padding: 10px; border-radius: 5px; background: #f1f0e9; color: #77786f; font-size: 9px; line-height: 1.6; }
+.export-status { min-height: 30px; margin: 10px 0; color: #898980; font-size: 8px; line-height: 1.5; }
+.export-controls progress { width: 100%; height: 5px; accent-color: #84945c; }
+.export-primary { display: block; width: 100%; border: 0; border-radius: 5px; background: $ink; color: white; padding: 10px; font-size: 10px; cursor: pointer; }
+.export-primary:disabled { opacity: .55; cursor: progress; }
+.export-cancel { display: block; width: 100%; margin-top: 7px; border: 1px solid $line; border-radius: 5px; background: transparent; color: #65665f; padding: 8px; font-size: 9px; cursor: pointer; }
+.clear-local-data { width: 100%; margin-top: 24px; padding: 7px 0; text-align: left; border: 0; background: transparent; color: #a2584b; font-size: 8px; cursor: pointer; }
+.clear-local-data:hover { text-decoration: underline; text-underline-offset: 2px; }

@@ -1,0 +1,92 @@
+name: Deploy tagged release to GitHub Pages
+
+on:
+  push:
+    tags:
+      - '*-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Full release tag to deploy (for example, 2-10-2026-v1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build tagged static site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve and validate release tag
+        id: release
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          PUSH_TAG: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="$PUSH_TAG"
+          fi
+          if [[ ! "$TAG" =~ ^[0-9]+-[0-9]+-[0-9]{4}-v[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid release tag: $TAG" >&2
+            echo "Expected a tag such as 2-10-2026-v1.0" >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Check out tagged release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build static site
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          if [[ "$REPOSITORY_NAME" == "$OWNER.github.io" ]]; then
+            BASE_PATH="/"
+          else
+            BASE_PATH="/$REPOSITORY_NAME/"
+          fi
+          npx tsc -b
+          npx vite build --base "$BASE_PATH"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Publish to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4
