@@ -1,4 +1,4 @@
-name: Create dated release
+name: Build production release
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   release:
-    name: Tag and publish release
+    name: Build, tag, and publish production dist
     runs-on: ubuntu-latest
     steps:
       - name: Validate release version
@@ -32,6 +32,31 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production site
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          if [[ "$REPOSITORY_NAME" == "$OWNER.github.io" ]]; then
+            BASE_PATH="/"
+          else
+            BASE_PATH="/$REPOSITORY_NAME/"
+          fi
+          npx tsc -b
+          npx vite build --base "$BASE_PATH"
+
+      - name: Package only the production dist contents
+        run: tar -czf byr-dist.tar.gz -C dist .
+
       - name: Create and push dated tag
         id: tag
         env:
@@ -46,17 +71,17 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Release $TAG"
+          git tag -a "$TAG" -m "Production release $TAG"
           git push origin "$TAG"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Publish GitHub release
+      - name: Publish release with production dist asset
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.tag.outputs.tag }}
-        run: gh release create "$RELEASE_TAG" --title "$RELEASE_TAG" --generate-notes
+        run: gh release create "$RELEASE_TAG" byr-dist.tar.gz --title "$RELEASE_TAG" --generate-notes
 
-      - name: Dispatch Pages deployment for the new tag
+      - name: Dispatch Pages deployment for this release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.tag.outputs.tag }}

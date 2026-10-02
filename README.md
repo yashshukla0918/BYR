@@ -27,10 +27,10 @@ The production-ready static site is written to `dist/`. Deploy that folder to an
 
 Two GitHub Actions workflows live in `.github/workflows/`:
 
-1. Run **Actions → Create dated release → Run workflow**, choose a version suffix such as `1.0`, and start the workflow from the commit you want to release. It creates a UTC day-month-year tag such as `2-10-2026-v1.0` and publishes a GitHub Release with generated notes. A tag cannot be reused, so choose another suffix if that date/version already exists.
-2. Pushing the new matching tag starts **Deploy tagged release to GitHub Pages** automatically. You can also run it manually and provide the complete tag. The workflow builds that tagged commit and deploys the static `dist/` site. Repository Pages must be enabled with **Build and deployment → Source: GitHub Actions**.
+1. Run **Actions → Build production release → Run workflow**, choose a version suffix such as `1.0`, and start the workflow from the commit you want to release. It runs the production TypeScript/Vite build first, then creates a UTC day-month-year tag such as `2-10-2026-v1.0`. The GitHub Release includes generated notes and a `byr-dist.tar.gz` asset containing only the generated `dist/` files. It dispatches the deployment workflow after the asset is published. A tag cannot be reused, so choose another suffix if that date/version already exists.
+2. **Deploy release dist to GitHub Pages** downloads `byr-dist.tar.gz` from the selected release and publishes those built files directly; it does not rebuild the source. You can also run it manually and provide the complete tag. Repository Pages must be enabled with **Build and deployment → Source: GitHub Actions**.
 
-The Pages workflow sets Vite's base path for both project sites (`/<repository>/`) and user/org sites (`/`).
+The release workflow sets Vite's base path for both project sites (`/<repository>/`) and user/org sites (`/`). Git tags still identify the source commit; the production-only release asset is the exact artifact deployed to Pages.
 
 ## Implemented features (Phases 0–2 and 5)
 
